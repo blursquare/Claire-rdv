@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Rendez-vous de signature</title>
+<!--
+  Page de réponse au sondage de créneaux de CLAIRE (étude, 01/10/2026), à la manière de Rallly :
+  carte blanche, tuiles de date, vote Oui / Si nécessaire / Non par créneau. Publiée sur GitHub Pages
+  (dépôt public blursquare/Claire-rdv : ce fichier + logo-office.png). Elle ne garde AUCUNE donnée :
+  tout ce qu'elle affiche vient du lien, après le « # » (que le navigateur n'envoie jamais au
+  serveur) — code du sondage, adresse de réponse de l'étude, dossier en abrégé (« VTE - MOR. »), date
+  limite, durée et créneaux. La réponse repart par email vers l'étude, objet
+  « [CLAIRE-CODE-P13S2] … » (oui : 1 et 3 ; si nécessaire : 2 ; P0 = aucun), que CLAIRE relit.
+  Aucune ressource extérieure. Source : dépôt de CLAIRE, page-sondage/ — toute modification se fait
+  là, puis se recopie dans le dépôt public.
+-->
+<style>
+  :root {
+    --fond: #F3F4F6; --carte: #FFFFFF; --encre: #111827; --doux: #6B7280; --pale: #9CA3AF;
+    --ligne: #E5E7EB; --ligne-forte: #D1D5DB; --survol: #F9FAFB;
+    --accent: #6D2332; --accent-pale: #F6ECEE;
+    --oui: #16A34A; --oui-pale: #DCFCE7; --si: #D97706; --si-pale: #FEF3C7; --non: #6B7280; --non-pale: #F3F4F6;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fond: #111113; --carte: #1C1C1F; --encre: #F4F4F5; --doux: #A1A1AA; --pale: #71717A;
+      --ligne: #2E2E33; --ligne-forte: #3F3F46; --survol: #232327;
+      --accent: #E0899A; --accent-pale: #3A2329;
+      --oui: #4ADE80; --oui-pale: #14321F; --si: #FBBF24; --si-pale: #3A2D0C; --non: #A1A1AA; --non-pale: #27272A;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--fond); color: var(--encre);
+    font: 15px/1.5 Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    padding: 24px 16px 48px; -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+  .logo { display: flex; justify-content: center; }
+  .logo img { width: 200px; max-width: 60%; height: auto; display: block; }
+  @media (prefers-color-scheme: dark) { .logo img { background: #FFFFFF; border-radius: 12px; padding: 6px 10px; } }
+  .carte { background: var(--carte); border: 1px solid var(--ligne); border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,.05); overflow: hidden; }
+  .tete { padding: 20px 20px 16px; border-bottom: 1px solid var(--ligne); }
+  h1 { margin: 0 0 10px; font-size: 20px; font-weight: 700; letter-spacing: -0.01em; text-wrap: balance; }
+  .meta { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; color: var(--doux); font-size: 14px; }
+  .meta li { display: flex; align-items: center; gap: 8px; }
+  .meta svg { width: 16px; height: 16px; flex: none; color: var(--pale); }
+  .meta b { color: var(--encre); font-weight: 600; }
+  .section-titre { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 14px 20px 8px; }
+  .section-titre h2 { margin: 0; font-size: 14px; font-weight: 600; }
+  .legende { display: flex; gap: 12px; font-size: 12px; color: var(--doux); flex-wrap: wrap; }
+  .legende span { display: inline-flex; align-items: center; gap: 4px; }
+  .options { list-style: none; margin: 0; padding: 0; }
+  .option { display: flex; align-items: center; gap: 14px; padding: 12px 20px; border-top: 1px solid var(--ligne); }
+  .option:first-child { border-top: 0; }
+  .tuile { width: 52px; flex: none; text-align: center; border: 1px solid var(--ligne); border-radius: 8px; overflow: hidden; background: var(--carte); line-height: 1.1; }
+  .tuile .mois { display: block; background: var(--accent); color: #FFFFFF; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 0; }
+  @media (prefers-color-scheme: dark) { .tuile .mois { color: #1C1C1F; } }
+  .tuile .jour { display: block; font-size: 20px; font-weight: 700; padding-top: 4px; }
+  .tuile .sem { display: block; font-size: 11px; color: var(--doux); padding: 1px 0 5px; }
+  .quand { flex: 1; min-width: 0; }
+  .quand .heure { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .quand .h-court { display: none; }
+  @media (max-width: 480px) {
+    .option { gap: 10px; padding: 12px 16px; }
+    .quand .heure { font-size: 14px; }
+    .quand .long, .quand .h-long { display: none; }
+    .quand .h-court { display: inline; }
+    .section-titre { flex-direction: column; align-items: flex-start; gap: 4px; padding: 14px 16px 8px; }
+    .tete, .commentaire { padding-left: 16px; padding-right: 16px; }
+    .pied { padding: 14px 16px 18px; }
+    .vote label { min-width: 38px; padding: 0 7px; }
+  }
+  .quand .long { font-size: 13px; color: var(--doux); }
+  .quand .long::first-letter { text-transform: uppercase; }
+  .vote { display: inline-flex; border: 1px solid var(--ligne-forte); border-radius: 8px; overflow: hidden; flex: none; }
+  .vote label { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-width: 44px; height: 38px; padding: 0 10px; cursor: pointer; color: var(--pale); font-size: 13px; font-weight: 500; border-left: 1px solid var(--ligne-forte); background: var(--carte); }
+  .vote label:first-child { border-left: 0; }
+  .vote label:hover { background: var(--survol); }
+  .vote input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .vote svg { width: 18px; height: 18px; flex: none; }
+  .vote .txt { display: none; }
+  @media (min-width: 560px) { .vote .txt { display: inline; } }
+  .vote label.oui:has(input:checked) { background: var(--oui-pale); color: var(--oui); }
+  .vote label.si:has(input:checked) { background: var(--si-pale); color: var(--si); }
+  .vote label.non:has(input:checked) { background: var(--non-pale); color: var(--non); }
+  .vote label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: -2px; z-index: 1; }
+  .ic-oui { color: var(--oui); } .ic-si { color: var(--si); } .ic-non { color: var(--non); }
+  .commentaire { padding: 14px 20px 4px; border-top: 1px solid var(--ligne); }
+  .commentaire label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .commentaire label span { font-weight: 400; color: var(--doux); }
+  textarea { width: 100%; font: inherit; color: var(--encre); background: var(--carte); border: 1px solid var(--ligne-forte); border-radius: 8px; padding: 9px 11px; min-height: 64px; resize: vertical; }
+  textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; border-color: transparent; }
+  .pied { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 20px 18px; }
+  .resume { font-size: 13px; color: var(--doux); }
+  .resume b { color: var(--encre); }
+  button {
+    font: inherit; font-weight: 600; font-size: 15px; color: #FFFFFF; background: var(--accent);
+    border: 0; border-radius: 8px; padding: 10px 18px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.08);
+  }
+  @media (prefers-color-scheme: dark) { button { color: #1C1C1F; } }
+  @media (max-width: 480px) { button { width: 100%; } }
+  button:hover:not(:disabled) { filter: brightness(1.08); }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .apres { margin: 0 20px 18px; padding: 14px 16px; border-radius: 10px; background: var(--oui-pale); font-size: 14px; }
+  .apres p { margin: 0 0 6px; }
+  .apres .ok { display: flex; align-items: center; gap: 8px; color: var(--oui); font-weight: 600; }
+  .apres .ok svg { width: 18px; height: 18px; flex: none; }
+  .copie { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 10px; margin: 8px 0 0; }
+  .copie dt { color: var(--doux); }
+  .copie dd { margin: 0; overflow-wrap: anywhere; font-weight: 600; user-select: all; }
+  .note { text-align: center; font-size: 12px; color: var(--pale); }
+  .invalide { padding: 24px 20px; text-align: center; color: var(--doux); }
+  [hidden] { display: none !important; }
+  @media (prefers-reduced-motion: no-preference) { .vote label { transition: background .12s, color .12s; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="logo"><img src="logo-office.png" alt="Me Sophie GOSSART — Office notarial de la Salamandre" width="200" height="117"></div>
+
+  <section class="carte" id="sondage" hidden>
+    <div class="tete">
+      <h1>Rendez-vous de signature</h1>
+      <ul class="meta">
+        <li id="meta-dossier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span>Dossier <b id="dossier"></b></span></li>
+        <li id="meta-office"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/></svg><span id="office"></span></li>
+        <li id="meta-limite" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="limite"></span></li>
+      </ul>
+    </div>
+    <form id="formulaire" novalidate>
+      <div class="section-titre">
+        <h2>Vos disponibilités</h2>
+        <div class="legende" aria-hidden="true">
+          <span><svg class="ic-oui" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Oui</span>
+          <span><svg class="ic-si" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4C4 7 4 17 7 20M17 4c3 3 3 13 0 16"/><path d="M8.5 12l2.5 2.5L15.5 9.5"/></svg>Si nécessaire</span>
+          <span><svg class="ic-non" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>Non</span>
+        </div>
+      </div>
+      <ul class="options" id="options"></ul>
+      <div class="commentaire">
+        <label for="mot">Commentaire <span>(facultatif)</span></label>
+        <textarea id="mot" maxlength="500" placeholder="Par exemple : plutôt en fin de matinée"></textarea>
+      </div>
+      <div class="pied">
+        <span class="resume" id="resume">Indiquez vos disponibilités pour chaque créneau.</span>
+        <button type="submit" id="envoyer" disabled>Envoyer ma réponse</button>
+      </div>
+    </form>
+    <div class="apres" id="apres" hidden>
+      <p class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>Votre messagerie s’ouvre avec la réponse prête : il ne reste qu’à l’envoyer.</p>
+      <p>Rien ne s’ouvre ? Écrivez simplement à l’étude, avec cet objet :</p>
+      <dl class="copie">
+        <dt>À</dt><dd id="copie-a"></dd>
+        <dt>Objet</dt><dd id="copie-objet"></dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="carte invalide" id="invalide" hidden>
+    <p>Ce lien est incomplet. Utilisez le bouton de l’email reçu de l’étude, ou répondez directement à cet email.</p>
+  </section>
+
+  <p class="note">Aucune donnée n’est enregistrée sur cette page : votre réponse part par email vers l’étude.</p>
+</main>
+<script>
+(function () {
+  'use strict';
+  // Lien : #v=1&c=CODE&a=adresse&d=VTE - MOR.&l=2026-10-08&m=60&o=Office…&s=202610141030,202610150930
+  var p = new URLSearchParams(location.hash.replace(/^#/, ''));
+  var code = (p.get('c') || '').toUpperCase();
+  var adresse = (p.get('a') || '').trim();
+  var dossier = (p.get('d') || '').slice(0, 60);
+  var office = (p.get('o') || 'Office notarial').slice(0, 80);
+  var limite = p.get('l') || '';
+  var duree = Math.min(600, Math.max(15, parseInt(p.get('m'), 10) || 60));
+  var NBSP = ' ';
+  var hm = function (h, m) { return String(h).padStart(2, '0') + NBSP + 'h' + NBSP + String(m).padStart(2, '0'); };
+  var creneaux = (p.get('s') || '').split(',').map(function (t, i) {
+    var x = /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})$/.exec(t);
+    if (!x) return null;
+    var date = new Date(Number(x[1]), Number(x[2]) - 1, Number(x[3]), Number(x[4]), Number(x[5]));
+    if (isNaN(date)) return null;
+    var fin = new Date(date.getTime() + duree * 60000);
+    return { n: i + 1, date: date, heure: hm(x[4], x[5]), fin: hm(fin.getHours(), fin.getMinutes()) };
+  });
+  var valide = /^[A-HJ-NP-Z2-9]{6}$/.test(code) && /^[^\s@<>"]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$/.test(adresse)
+    && creneaux.length >= 1 && creneaux.length <= 5 && creneaux.every(Boolean);
+  if (!valide) { document.getElementById('invalide').hidden = false; return; }
+
+  var jourLong = function (d) { return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }); };
+  var jourCourt = function (d) {
+    return d.toLocaleDateString('fr-FR', { weekday: 'short' }).replace('.', '') + '. '
+      + String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+  };
+  var texte = function (s) { return s.replace(/ /g, ' '); };
+  document.getElementById('sondage').hidden = false;
+  if (dossier) document.getElementById('dossier').textContent = dossier; else document.getElementById('meta-dossier').hidden = true;
+  document.getElementById('office').textContent = office;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(limite)) {
+    document.getElementById('limite').textContent = 'Réponse attendue avant le ' + jourLong(new Date(limite + 'T12:00:00'));
+    document.getElementById('meta-limite').hidden = false;
+  }
+
+  // Les créneaux : construits en DOM (textContent), jamais en HTML — le lien vient de l'extérieur.
+  var ICONES = {
+    oui: '<path d="M5 12l5 5L20 7"/>',
+    si: '<path d="M7 4C4 7 4 17 7 20M17 4c3 3 3 13 0 16"/><path d="M8.5 12l2.5 2.5L15.5 9.5"/>',
+    non: '<path d="M6 6l12 12M18 6L6 18"/>'
+  };
+  var LIBELLES = { oui: 'Oui', si: 'Si nécessaire', non: 'Non' };
+  var el = function (tag, classe, txt) { var e = document.createElement(tag); if (classe) e.className = classe; if (txt != null) e.textContent = txt; return e; };
+  var liste = document.getElementById('options');
+  creneaux.forEach(function (c) {
+    var li = el('li', 'option');
+    var tuile = el('div', 'tuile');
+    tuile.setAttribute('aria-hidden', 'true');
+    tuile.appendChild(el('span', 'mois', c.date.toLocaleDateString('fr-FR', { month: 'short' }).replace('.', '')));
+    tuile.appendChild(el('span', 'jour', String(c.date.getDate())));
+    tuile.appendChild(el('span', 'sem', c.date.toLocaleDateString('fr-FR', { weekday: 'short' }).replace('.', '')));
+    var quand = el('div', 'quand');
+    var heure = el('div', 'heure');
+    heure.appendChild(el('span', 'h-long', c.heure + ' – ' + c.fin));
+    heure.appendChild(el('span', 'h-court', (c.heure + '–' + c.fin).replace(/\u00a0/g, '')));
+    quand.appendChild(heure);
+    quand.appendChild(el('div', 'long', jourLong(c.date)));
+    var vote = el('div', 'vote');
+    vote.setAttribute('role', 'radiogroup');
+    vote.setAttribute('aria-label', jourLong(c.date) + ' à ' + texte(c.heure));
+    ['oui', 'si', 'non'].forEach(function (v) {
+      var lab = el('label', v);
+      lab.title = LIBELLES[v];
+      var input = el('input');
+      input.type = 'radio'; input.name = 'c' + c.n; input.value = v;
+      input.setAttribute('aria-label', LIBELLES[v]);
+      lab.appendChild(input);
+      var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor');
+      svg.setAttribute('stroke-width', v === 'si' ? '2.5' : '3'); svg.setAttribute('stroke-linecap', 'round'); svg.setAttribute('stroke-linejoin', 'round');
+      svg.setAttribute('aria-hidden', 'true');
+      svg.innerHTML = ICONES[v];
+      lab.appendChild(svg);
+      lab.appendChild(el('span', 'txt', LIBELLES[v]));
+      vote.appendChild(lab);
+    });
+    li.appendChild(tuile); li.appendChild(quand); li.appendChild(vote);
+    liste.appendChild(li);
+  });
+
+  var bouton = document.getElementById('envoyer');
+  var resume = document.getElementById('resume');
+  var reponses = function () {
+    var r = { oui: [], si: [], non: [], vide: 0 };
+    creneaux.forEach(function (c) {
+      var choisi = document.querySelector('input[name="c' + c.n + '"]:checked');
+      if (!choisi) r.vide++;
+      r[choisi ? choisi.value : 'non'].push(c.n);
+    });
+    return r;
+  };
+  var maj = function () {
+    var r = reponses();
+    bouton.disabled = r.vide === creneaux.length;
+    if (bouton.disabled) { resume.textContent = 'Indiquez vos disponibilités pour chaque créneau.'; return; }
+    var parts = [];
+    if (r.oui.length) parts.push(r.oui.length + ' oui');
+    if (r.si.length) parts.push(r.si.length + ' si nécessaire');
+    resume.textContent = '';
+    if (parts.length) { var b = el('b', null, parts.join(', ')); resume.appendChild(b); resume.appendChild(document.createTextNode(' sur ' + creneaux.length + ' créneau' + (creneaux.length > 1 ? 'x' : ''))); }
+    else resume.textContent = 'Aucun créneau ne vous convient.';
+  };
+  liste.addEventListener('change', maj);
+
+  document.getElementById('formulaire').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (bouton.disabled) return;
+    var r = reponses();
+    var jeton = (r.oui.length || r.si.length) ? 'P' + (r.oui.join('') || '') + (r.si.length ? 'S' + r.si.join('') : '') : 'P0';
+    var court = function (ns) { return ns.map(function (n) { var c = creneaux[n - 1]; return jourCourt(c.date) + ' ' + texte(c.heure); }).join(', '); };
+    var resumeObjet = [];
+    if (r.oui.length) resumeObjet.push('Oui : ' + court(r.oui));
+    if (r.si.length) resumeObjet.push('Si nécessaire : ' + court(r.si));
+    var sujet = '[CLAIRE-' + code + '-' + jeton + '] ' + (dossier ? dossier + ' — ' : '')
+      + (resumeObjet.length ? resumeObjet.join(' · ') : 'Aucun créneau ne convient');
+    var corps = ['Bonjour,', '', 'Voici mes disponibilités pour le rendez-vous de signature' + (dossier ? ' (' + dossier + ')' : '') + ' :', '']
+      .concat(creneaux.map(function (c) {
+        var v = r.oui.indexOf(c.n) !== -1 ? '✓ Oui' : r.si.indexOf(c.n) !== -1 ? '(✓) Si nécessaire' : '✗ Non';
+        return v + ' — ' + jourLong(c.date) + ' à ' + texte(c.heure);
+      }));
+    var mot = document.getElementById('mot').value.trim();
+    if (mot) corps.push('', mot);
+    corps.push('', 'Merci de ne pas modifier l’objet de cet email : il permet à l’étude d’enregistrer votre réponse.');
+    document.getElementById('copie-a').textContent = adresse;
+    document.getElementById('copie-objet').textContent = sujet;
+    document.getElementById('apres').hidden = false;
+    location.href = 'mailto:' + adresse + '?subject=' + encodeURIComponent(sujet) + '&body=' + encodeURIComponent(corps.join('\n'));
+  });
+})();
+</script>
+</body>
+</html>
