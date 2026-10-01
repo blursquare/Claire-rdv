@@ -6,7 +6,8 @@ créneaux de signature qui leur conviennent : Oui, Si nécessaire ou Non pour ch
 - **Aucune donnée n'est enregistrée ici.** Tout ce que la page affiche (code du sondage, dossier en
   abrégé, créneaux, date limite) est dans le lien envoyé par l'étude, après le `#` : cette partie n'est
   jamais transmise au serveur.
-- La réponse repart par **email vers l'étude** ; le logiciel CLAIRE de l'étude la relit.
+- La réponse repart vers l'étude : directement par le relais Google de l'étude quand il est réglé,
+  sinon par la messagerie du client ; le logiciel CLAIRE de l'étude la relit.
 - Aucune ressource extérieure (ni police, ni script, ni statistique).
 
 Le fichier source est tenu dans le dépôt de CLAIRE (`page-sondage/`) : toute modification se fait
